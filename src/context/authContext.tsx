@@ -1,6 +1,6 @@
 // src/contexts/AuthContext.tsx
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/utils/supabase';
 import { User } from '@supabase/supabase-js';
 
 interface AuthContextType {
@@ -25,8 +25,8 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-const DASHBOARD_URL = import.meta.env.VITE_SUPABASE_URL;
-const AUTH_URL = import.meta.env.VITE_AUTH_URL;
+const DASHBOARD_URL = import.meta.env.VITE_SUPABASE_URL!;
+const AUTH_URL = import.meta.env.VITE_AUTH_URL!;
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
