@@ -1,3 +1,11 @@
+[
+build
+]
+  command = "bun install && bun run build"
+  publish = "dist"
+  base = "/"
+
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
