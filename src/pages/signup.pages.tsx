@@ -4,24 +4,28 @@ import { IMG1, IMG2, IMG3 } from '@/assets';
 import LOGO from '@/assets/logo.png';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/context/authContext';
+import { useNavigate } from 'react-router-dom';
 
 interface FormData {
   email: string;
   password: string;
-  rememberMe: boolean;
+  acceptTerms: boolean;
 }
 
-const LoginPage = () => {
+const DASHBOARD_URL = import.meta.env.VITE_DASHBOARD_URL;
+
+const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
-    rememberMe: false
+    acceptTerms: false
   });
   const [error, setError] = useState<string>('');
   
-  const { signInWithGoogle, signInWithGithub } = useAuth();
+  const { signInWithGoogle, signInWithGithub, user } = useAuth();
+  const navigate = useNavigate();
 
   const images = [IMG1, IMG2, IMG3];
 
@@ -33,37 +37,13 @@ const LoginPage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError('');
-    // Add your email/password login logic here
-  };
-
-  const handleGoogleSignIn = async () => {
-    try {
-      await signInWithGoogle();
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'An error occurred during Google sign in');
+  useEffect(() => {
+    if (user) {
+      window.location.href = DASHBOARD_URL;
     }
-  };
+  }, [user, navigate]);
 
-  const handleGithubSignIn = async () => {
-    try {
-      await signInWithGithub();
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'An error occurred during GitHub sign in');
-    }
-  };
-
-  // Your animation variants
+  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -100,6 +80,42 @@ const LoginPage = () => {
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError('');
+
+    if (!formData.acceptTerms) {
+      setError('Please accept the terms and conditions');
+      return;
+    }
+
+    // Add your email/password signup logic here
+  };
+
+  const handleGoogleSignUp = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An error occurred during Google sign up');
+    }
+  };
+
+  const handleGithubSignUp = async () => {
+    try {
+      await signInWithGithub();
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An error occurred during GitHub sign up');
+    }
+  };
+
   return (
     <motion.div 
       className="flex min-h-screen bg-gray-200"
@@ -107,7 +123,8 @@ const LoginPage = () => {
       animate="visible"
       variants={containerVariants}
     >
-      {/* Left side carousel remains the same */}
+      {/* Left side - Image Carousel */}
+  
       <motion.div 
         className="hidden lg:flex lg:w-1/2 relative overflow-hidden rounded-r-3xl"
         initial={{ x: -100, opacity: 0 }}
@@ -158,7 +175,8 @@ const LoginPage = () => {
         </motion.div>
       </motion.div>
 
-      {/* Right side - Login form */}
+
+      {/* Right side - Sign up form */}
       <div className="w-full lg:w-1/2 p-8 sm:p-12 lg:p-20">
         <motion.div 
           className="flex justify-between items-center mb-12"
@@ -191,15 +209,15 @@ const LoginPage = () => {
             className="text-4xl font-bold text-black mb-2"
             variants={itemVariants}
           >
-            Welcome back
+            Create an account
           </motion.h1>
           <motion.p 
             className="text-gray-500 mb-8"
             variants={itemVariants}
           >
-            New to Agentkube?{' '}
-            <a href="/signup" className="text-gray-900 hover:text-emerald-800">
-              Create an account
+            Already have an account?{' '}
+            <a href="/login" className="text-gray-900 hover:text-emerald-800">
+              Log in
             </a>
           </motion.p>
 
@@ -237,7 +255,7 @@ const LoginPage = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                placeholder="Password"
+                placeholder="Enter your password"
                 className="w-full px-4 py-3 rounded-lg bg-transparent text-black border border-gray-700 focus:border-green-500 focus:outline-none"
               />
               <motion.button
@@ -252,25 +270,23 @@ const LoginPage = () => {
             </motion.div>
 
             <motion.div 
-              className="flex items-center justify-between mb-4"
+              className="flex items-center mb-4"
               variants={itemVariants}
             >
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="remember"
-                  name="rememberMe"
-                  checked={formData.rememberMe}
-                  onChange={handleInputChange}
-                  className="w-4 h-4 rounded border-gray-700 bg-transparent text-green-500 focus:ring-green-500"
-                />
-                <label htmlFor="remember" className="ml-2 text-sm text-gray-600">
-                  Remember me
-                </label>
-              </div>
-              <a href="/forgot-password" className="text-sm text-gray-900 hover:text-green-400">
-                Forgot password?
-              </a>
+              <input
+                type="checkbox"
+                id="terms"
+                name="acceptTerms"
+                checked={formData.acceptTerms}
+                onChange={handleInputChange}
+                className="w-4 h-4 rounded border-gray-700 bg-transparent text-green-500 focus:ring-green-500"
+              />
+              <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
+                I agree to the{' '}
+                <a href="#" className="text-blue-800 font-medium hover:text-green-400">
+                  Terms & Conditions
+                </a>
+              </label>
             </motion.div>
 
             <motion.button
@@ -280,7 +296,7 @@ const LoginPage = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              Sign in
+              Create account
             </motion.button>
 
             <motion.div 
@@ -291,7 +307,7 @@ const LoginPage = () => {
                 <div className="w-full border-t border-gray-700"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gray-200 text-gray-900">Or continue with</span>
+                <span className="px-2 bg-gray-200 text-gray-900">Or register with</span>
               </div>
             </motion.div>
 
@@ -301,7 +317,7 @@ const LoginPage = () => {
             >
               <motion.button
                 type="button"
-                onClick={handleGoogleSignIn}
+                onClick={handleGoogleSignUp}
                 className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-700 rounded-lg text-black hover:bg-gray-300 transition-colors"
                 variants={itemVariants}
                 whileHover={{ scale: 1.02 }}
@@ -312,7 +328,7 @@ const LoginPage = () => {
               </motion.button>
               <motion.button
                 type="button"
-                onClick={handleGithubSignIn}
+                onClick={handleGithubSignUp}
                 className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-700 rounded-lg text-black hover:bg-gray-300 transition-colors"
                 variants={itemVariants}
                 whileHover={{ scale: 1.02 }}
@@ -329,4 +345,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default SignUpPage;
