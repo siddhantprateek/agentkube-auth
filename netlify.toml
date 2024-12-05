@@ -1,6 +1,4 @@
-[
-build
-]
+[build]
   command = "bun install && bun run build"
   publish = "dist"
   base = "/"
