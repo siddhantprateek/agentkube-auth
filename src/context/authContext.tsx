@@ -25,8 +25,8 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-const DASHBOARD_URL = import.meta.env.VITE_SUPABASE_URL!;
-const AUTH_URL = import.meta.env.VITE_AUTH_URL!;
+const DASHBOARD_URL = import.meta.env.VITE_DASHBOARD_URL || 'http://localhost:5174';
+const AUTH_URL = import.meta.env.VITE_AUTH_URL || 'http://localhost:5173';
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
       if (error) throw error;
     } catch (error) {
-      console.error('Error signing in with Google:', error instanceof Error ? error.message : 'An error occurred');
+      console.error('Error signing in with Google:', error);
       throw error;
     }
   };
